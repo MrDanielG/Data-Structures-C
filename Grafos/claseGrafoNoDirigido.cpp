@@ -1,10 +1,12 @@
 #include <iostream>
+#include <iomanip>
 
 #define MAX 20
 
 using namespace std;
 
-/* Definición de la plantilla de la clase GrafoND. Se incluyen como atributos el total de vértices (NumVer), 
+
+/* Definición de la plantilla de la clase GrafoND. Se incluyen como atributos el total de vértices (NumVer),
    los costos/distancias entre los vértices (MatAdy) y sus nombres (Vertices).
 */
 template<class T>
@@ -14,18 +16,46 @@ class GrafoND
       T MatAdy[MAX][MAX];
       int NumVer, Vertices[MAX];
    public:
-      // Método constructor y métodos auxiliares para leerla información relacionada al grafo e 
+      // Método constructor y métodos auxiliares para leerla información relacionada al grafo e
 	  // imprimir los resultados que se obtienen con los demás métodos
 	  GrafoND();
 	  void Lee();
 	  void Imprime(int);
-	  
+	  void graph_default();
+
 	  // Métodos que permiten el cálculo del árbol de costo mínimo.
 	  void Prim();
-	  void Kruskal();	
+	  void Kruskal();
 };
 
-// Método constructor. Inicializa el número de vértices en cero y la matriz de distancias con un valor arbitrario 
+template <class T>
+void GrafoND<T>::graph_default(){
+    NumVer=6;
+    for(int i=0; i<NumVer; i++)
+        Vertices[i]=i+1;
+
+    MatAdy[1 -1][2 -1]= 3;
+    MatAdy[1 -1][5 -1]= 2;
+    MatAdy[1 -1][6 -1]= 5;
+    MatAdy[2 -1][6 -1]= 3;
+    MatAdy[2 -1][3 -1]= 1;
+    MatAdy[3 -1][4 -1]= 3;
+    MatAdy[3 -1][6 -1]= 2;
+    MatAdy[5 -1][4 -1]= 2;
+    MatAdy[6 -1][5 -1]= 3;
+
+    MatAdy[2 -1][1 -1]= 3;
+    MatAdy[5 -1][1 -1]= 2;
+    MatAdy[6 -1][1 -1]= 5;
+    MatAdy[6 -1][2 -1]= 3;
+    MatAdy[3 -1][2 -1]= 1;
+    MatAdy[4 -1][3 -1]= 3;
+    MatAdy[6 -1][3 -1]= 2;
+    MatAdy[4 -1][5 -1]= 2;
+    MatAdy[5 -1][6 -1]= 3;
+}
+
+// Método constructor. Inicializa el número de vértices en cero y la matriz de distancias con un valor arbitrario
 // muy grande (999), excepto en la diagonal principal, donde el costo es cero.
 template<class T>
 GrafoND<T>::GrafoND()
@@ -70,20 +100,22 @@ void GrafoND<T>::Lee()
     }
 }
 
-/* Este método encuentra el árbol abarcador de costo mínimo de un grafo. En el arreglo VerAux se almacenan los vértices 
+/* Este método encuentra el árbol abarcador de costo mínimo de un grafo. En el arreglo VerAux se almacenan los vértices
   con menor costo que van formando el árbol abarcador. */
 template <class T>
 void GrafoND<T>::Prim()
 {
+    cout << "\n------> Prim Algorithm \n\n" ;
 	int MCosto[MAX], VerAux[MAX], Ind1, Ind2, VerMen, MenCos;
-    // Inicializa el subconjunto de vértices VerAux con el valor del primer vértice. 
+    // Inicializa el subconjunto de vértices VerAux con el valor del primer vértice.
     for (Ind1=0; Ind1<NumVer; Ind1++)
     {
        MCosto[Ind1]=MatAdy[0][Ind1];
        VerAux[Ind1]=0;
     }
-    cout << "\n\n\nArcos y costos del arbol abarcador de costo minimo\n\n";
-    cout << "\nVertice   Vertice   Costo \n";
+    cout << "\n   Arcos y costos del arbol abarcador de costo minimo\n";
+    int esp1=9;
+    cout << "\n" << setw(esp1)<< "Vertice" << "|" <<setw(esp1)<< "Vertice" << "|" <<setw(esp1)<< "Costo \n";
     // Encuentra el vértice VerMen en (Vertices - VerAux) tal que el costo de ir de dicho vértice a uno de VerAux sea mínimo.
     for (Ind1=0; Ind1 < NumVer-1; Ind1++)
     {
@@ -95,7 +127,8 @@ void GrafoND<T>::Prim()
              MenCos=MCosto[Ind2];
              VerMen=Ind2;
           }
-        cout << "\n " << Vertices[VerMen] << "     –    " << Vertices[VerAux[VerMen]] << "    "<< MatAdy[VerMen][VerAux[VerMen]];
+          int esp=4;
+        cout << "\n " <<setw(esp)<< Vertices[VerMen] << setw(esp)<< "|" << setw(esp) <<  Vertices[VerAux[VerMen]]<< setw(esp) <<"|" << setw(esp) <<  MatAdy[VerMen][VerAux[VerMen]];
         // Se agrega el vértice VerMen a VerAux y se redefinen los costos asociados.
         MCosto[VerMen]=1000;
         for (Ind2=1; Ind2 < NumVer; Ind2++)
@@ -117,7 +150,7 @@ int Minimo (int Val1, int Val2)
     return Min;
 }
 
-// Función auxiliar que obtiene el valor más grande de dos dados como parámetros. La utiliza el método de Kruskal. 
+// Función auxiliar que obtiene el valor más grande de dos dados como parámetros. La utiliza el método de Kruskal.
 int Maximo (int Val1, int Val2)
 {
 	int Max= Val1;
@@ -126,19 +159,20 @@ int Maximo (int Val1, int Val2)
     return Max;
 }
 
-// Este método encuentra el árbol abarcador de costo mínimo de un grafo. 
+// Este método encuentra el árbol abarcador de costo mínimo de un grafo.
 template <class T>
 void GrafoND<T>::Kruskal()
 {
-	/* El arreglo auxiliar ArisCosto[][] almacena en cada renglón los datos de una arista: vértices adyacentes y costo. 
+    cout << "\n   ---> Kruskal Algorithm " << endl;
+	/* El arreglo auxiliar ArisCosto[][] almacena en cada renglón los datos de una arista: vértices adyacentes y costo.
 	   El arreglo Partic[] almacena particiones de Vertices. Inicialmente Partic= {{1},{2},...,{NumVer}}. */
     int ArisCosto[2*MAX][3], Partic[MAX], Ind1, Ind2, Ver1, Ver2, TotAris, Menor, Mayor, Band;
 
-    // Inicializa Partic[]. 
+    // Inicializa Partic[].
     for (Ind1=0; Ind1 < NumVer; Ind1++)
        Partic[Ind1]=Ind1;
 
-    // Inicializa ArisCosto[][] 
+    // Inicializa ArisCosto[][]
     Ver1=0;
     Ver2=0;
     TotAris=0;
@@ -152,12 +186,14 @@ void GrafoND<T>::Kruskal()
              Ver2=0;
              TotAris++;
           }
-    // Ciclo en el cual se seleccionan aristas y se agregan los vértices mientras existan vértices en Partic que 
+    // Ciclo en el cual se seleccionan aristas y se agregan los vértices mientras existan vértices en Partic que
 	// se encuentren en distintas particiones.
     Band=0;
+    int espa=10;
+    cout << "\n" << setw(espa) << "Vertice" << setw(espa) << "Vertice" << setw(espa) << "Costo" << endl;
     while (Band != 1)
     {
-       // Se selecciona la arista de menor costo. 
+       // Se selecciona la arista de menor costo.
        Menor=999;
        for (Ind1=0; Ind1 < TotAris; Ind1++)
           if (ArisCosto[Ind1][2] < Menor)
@@ -172,15 +208,15 @@ void GrafoND<T>::Kruskal()
        // Se verifica que la arista (Ver1, Ver2) una dos vértices que pertenecen a particiones diferentes.
        if (Partic[Ver1] != Partic[Ver2])
        {
-          cout << "\nVertice: " << Vertices[Ver1] << " Vertice: " << Vertices[Ver2] << " Costo: " << MatAdy[Ver1][Ver2] << "\n\n";
+          cout << setw(espa) << Vertices[Ver1] << setw(espa) << Vertices[Ver2] << setw(espa) << MatAdy[Ver1][Ver2] << "\n";
           Mayor=Maximo(Partic[Ver1], Partic[Ver2]);
           for (Ind1=0; Ind1 < NumVer; Ind1++)
              if (Ind1 == Ver1 || Ind1 == Ver2 || Partic[Ind1] == Mayor)
                 Partic[Ind1]=Minimo(Partic[Ver1], Partic[Ver2]);
        }
-       // Ciclo para determinar si quedan vértices en particiones diferentes. 
+       // Ciclo para determinar si quedan vértices en particiones diferentes.
        Ind1=0;
-       while (Ind1 < NumVer && !Band) 
+       while (Ind1 < NumVer && !Band)
        {
           if (Partic[Ind1] != 0)
              Band=1;
@@ -193,7 +229,14 @@ void GrafoND<T>::Kruskal()
 
 
 
-int main() 
+int main()
 {
+    GrafoND<int> graph;
+    graph.graph_default();
+//    graph.Prim();
+//    graph.Kruskal();
+    graph.Prim();
+    graph.Kruskal();
+
 	return 0;
 }
